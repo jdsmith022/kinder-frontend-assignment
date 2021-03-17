@@ -8,6 +8,6 @@
 <style>
   .search-header-section {
     background-color: #F8F8F8;
-    min-height: 125px;
+    min-height: 150px;
   }
 </style>

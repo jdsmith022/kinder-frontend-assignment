@@ -114,7 +114,6 @@ export interface CauseCertificateType {
 	website: string
 	source: string
 }
-
 export interface ApiDataType {
   query: string,
   entities: {
@@ -123,13 +122,20 @@ export interface ApiDataType {
     currentPage: number
   }
 }
-
 export interface SearchDataType {
   totalFound: number,
   searchParam: string
 }
-
-export interface CardDataType {
-  officialName: string
-  searchParam: string
+export interface ArrangedDataType {
+  officialName: string,
+  tagline: string,
+  category: {
+    data: CauseCategoryType[]
+  },
+  stage: number,
+  images: ImageType,
+  logo: {
+		data: ImageDataType
+	},
+  website: string
 }

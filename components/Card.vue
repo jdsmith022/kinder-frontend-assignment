@@ -1,11 +1,16 @@
 <template>
-  <div class="column">
+  <section>
+    <div class="container"></div>
+  <b-loading :is-full-page="isFullPage" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading>
+  <div class="column" style="position: relative">
     <div class="card organization-card">
       <div class="card-content">
         <div class="card-org-content">
-          <!-- {{ set }} -->
-          <div v-if="set.images" class="org-image">
-            <img :src="set.images.data.files.data.url">
+          <!-- {{ set.shareImage }} -->
+          <!-- {{ set.website }} -->
+
+          <div v-if="set.images.data" class="org-image">
+            <img :src="set.images.data.files.data.url" :href="set.website" target="blank">
           </div>
           <div class="sub-header">
             <p>
@@ -34,6 +39,8 @@
       </div>
     </div>
   </div>
+</div>
+  </section>
 </template>
 
 <script lang='ts'>
@@ -48,26 +55,25 @@
 
     data() {
       return {
-        orderedData: {} as CauseDataType,
-        searchInput: '',
-        pagination: '1',
-        totalFound: '',
-
+        // orderedData: {} as CauseDataType,
+        isLoading: false as boolean,
+        isFullPage: false as boolean
       }
     }
 
     @Prop({default: ' '}) set: CauseDataType
-    //stage one = basicPassed === false =.?  hasPassedPreliminary
-      //1/3 progress bar
-    //stage two = publishedAt === false
-      //2/3 proggress bar
-    //starge three = basicPassed === true && publishedAt === not null
-      //full progress bar
+  
 
-    // if in stage 2 or 3 
-      // show gray box with text: 
-    //       Membership pending
-    // This organisation has no published profile
+    openLoading() {
+      this.isLoading = true
+      setTimeout(() => {
+          this.isLoading = false
+      }, 2000)
+    }
+
+    beforeMount(){
+      this.openLoading()
+    }
 
   }
 </script>
