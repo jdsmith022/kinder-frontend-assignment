@@ -1,42 +1,46 @@
 <template>
-  <div class="column">
-    <div class="card">
-      <header class="card-header">
-        <p class="card-header-title has-text-grey">
-          {{ title }}
-        </p>
-      </header>
-      <div class="card-content">
-        <div class="content has-text-centered">
-          <b-icon
-            :icon="icon"
-            size="is-large"
-            type="is-primary"
-          />
+  <div class="container">
+    <div class="column">
+      <div class="card organization-card">
+        <div class="card-content">
+          <div class="card-org-content">
+
+            <div class="sub-header">
+              <p>
+                Organization
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-      <footer class="card-footer">
-        <div class="card-footer-item">
-          <span>
-            <slot />
-          </span>
-        </div>
-      </footer>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    title: {
-      type: String,
-      required: true
-    },
-    icon: {
-      type: String,
-      required: true
-    }
+<script lang='ts'>
+
+  import { Component, Prop, Vue } from 'vue-property-decorator'
+  import { CauseDataType } from '@/src/types'
+
+  @Component({})
+
+  //type interface enabled
+  export default class Card extends Vue {
+
+    @Prop({default: ' '}) cardData: CauseDataType
+
   }
-}
 </script>
+
+<style>
+  .card {
+    min-height: 500px;
+  }
+  .organization-card {
+    box-shadow: gray;
+  }
+  .sub-header {
+    color: #E63E60;
+    font-size: 12px;
+  }
+</style>

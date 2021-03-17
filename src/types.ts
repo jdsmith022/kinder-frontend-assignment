@@ -115,11 +115,21 @@ export interface CauseCertificateType {
 	source: string
 }
 
-export interface SearchParamsType {
+export interface ApiDataType {
   query: string,
   entities: {
     entity: string,
     perPage: number,
     currentPage: number
   }
+}
+
+export interface SearchDataType {
+  totalFound: number,
+  searchParam: string
+}
+
+export interface CardDataType {
+  officialName: string
+  searchParam: string
 }

@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="search-results">
-        <Results :searchResults="searchResults" ></Results>
+        <Results :searchResults="searchResults" :cardData="cardData"></Results>
       </div>
     </div>
   </section>
@@ -25,7 +25,7 @@
 <script lang="ts">
 
   import { Component, Prop, Vue } from 'vue-property-decorator'
-  import { SearchParamsType, SearchResponsePaginationDataType, CauseDataType } from '@/src/types'
+  import { ApiDataType, SearchResponsePaginationDataType, CauseDataType, SearchDataType } from '@/src/types'
   import { getOrganizations } from '@/src/http'
   import Header from '@/components/Header'
   import Results from '@/components/Results'
@@ -39,37 +39,39 @@
   })
   export default class SearchBar extends Vue {
 
-    // @Prop({default: ' '}) searchResults: SearchTotalType
+    // @Prop({default: ' '}) searchResults: SearchDataType
 
     data() {
       return {
-        searchData: {} as SearchTotalType,
-        cardData: {} as SearchParamsType,
+        searchData: {} as ApiDataType,
+        searchResults: {} as SearchDataType,
+        cardData: {} as CauseDataType,
         searchInput: '',
-        pagination: ' ',
+        pagination: '1',
         totalFound: '',
 
       }
     }
 
     /** Queries Kinder API and handles response*/
-    onSearch(searchData: searchParamsType, response: SearchResponsePaginationDataType, cardData: CauseDataType): interface<SearchParamsType> {
+    onSearch(searchData: ApiDataType, response: SearchResponsePaginationDataType, cardData: CauseDataType): void {
       this.searchData = {
         query: this.searchInput,
         entities: [ {
           entity: "causes",
           perPage:  6,
-          currentPage: 1, //this.pagination
+          currentPage: this.pagination
         }],
       }
       getOrganizations(this.searchData).then(response => {
-        const cardData = response.causes.data
-        //cardData holds data needed for org cards
-        // return cardData
+        this.cardData = response.data
+        this.searchResults = {
+          totalFound: response.causes.meta.pagination.total,
+          searchParam: this.searchInput
+        }
+        this.pagination = this.pagination + 1
       })
     }
-
-    
       // let pagination += 1;
       //call Kinder API await/async
 
