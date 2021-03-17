@@ -9,7 +9,7 @@
         <div class="search">
           <input v-model="searchInput" class="search-bar" v-on:keyup.enter="onSearch()" placeholder="e.g. Health"/>
           <div class="search-bar-icons">
-            <img class="close-icon" @click="onClose()" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
+            <img class="clear-icon" @click="onClear()" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
             <span class="vertical-line"></span>
             <svg class="search-icon svg-icon search-icon" @click="onSearch()" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">A magnifying glass icon.</desc><g class="search-path" fill="none" stroke="#848F91"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
           </div>
@@ -64,19 +64,20 @@
         }],
       }
       getOrganizations(this.searchData).then(response => {
-        this.cardData = response.data
+        this.cardData = response.causes.data
         this.searchResults = {
           totalFound: response.causes.meta.pagination.total,
           searchParam: this.searchInput
         }
         this.pagination = this.pagination + 1
+        console.log("cardData ", this.cardData)
       })
     }
       // let pagination += 1;
       //call Kinder API await/async
 
-    onClose(): void {
-      console.log("somethings to do...")
+    onClear(): void {
+      this.searchInput = '';
     }
   }
   </script>
@@ -109,7 +110,7 @@
     padding: 2px;
     margin-right: 4px;
     display: flex; }
-  .close-icon {
+  .clear-icon {
     opacity: 0.7;
     cursor: pointer;
     width: 16px;

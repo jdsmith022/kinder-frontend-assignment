@@ -7,8 +7,10 @@
           ( {{ searchResults.totalFound }} )
         </p>
       </h3>
-      <div v-for="(set) in cardData"class="columns is-mobile">
-        <Card :set="cardData"/>
+      <div class="columns is-multiline is-mobile">
+        <div v-if="searchResults.searchParam" v-for="(set, index) in cardData" :key="index">
+          <Card :set="set"/>
+        </div>
       </div>
     </div>
   </section>
@@ -40,11 +42,18 @@ export default class Results extends Vue {
     font-weight: bold;
     display: flex;
     flex-direction: row;
-    padding-right: 8px;
-  }
+    padding-right: 8px; }
   .total-search-result {
     font-weight: normal;
     color: gray;
-    opacity: 0.5;
+    opacity: 0.5; }
+  .limit-flex {
+  display: flex !important;
+  flex-wrap: wrap;
+  margin: auto;
+  padding-bottom: 150px;
+  justify-content: center; }
+  .columns {
+    margin: auto;
   }
 </style>
