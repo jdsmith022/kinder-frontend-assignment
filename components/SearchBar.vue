@@ -15,45 +15,63 @@
           </div>
         </div>
       </div>
+      <div class="search-results">
+        <Results :searchResults="searchResults" ></Results>
+      </div>
     </div>
   </section>
 </template>
 
 <script lang="ts">
 
-  import Vue from 'vue'
-  import Component from 'vue-class-component'
-  import { SearchParams, SearchResponsePaginationDataType } from '@/src/types'
+  import { Component, Prop, Vue } from 'vue-property-decorator'
+  import { SearchParamsType, SearchResponsePaginationDataType, CauseDataType } from '@/src/types'
+  import { getOrganizations } from '@/src/http'
   import Header from '@/components/Header'
+  import Results from '@/components/Results'
+
 
   @Component({
     componenets: {
       Header,
+      Results
     }
   })
   export default class SearchBar extends Vue {
+
+    // @Prop({default: ' '}) searchResults: SearchTotalType
+
     data() {
       return {
-        data: {} as SearchParams,
-        response: {} as SearchResponsePaginationDataType,
+        searchData: {} as SearchTotalType,
+        cardData: {} as SearchParamsType,
         searchInput: '',
+        pagination: ' ',
+        totalFound: '',
 
       }
     }
-    onSearch(data: searchParams, response: SearchResponsePaginationDataType): void {
-      //create data interface to send to api
-      this.data = {
+
+    /** Queries Kinder API and handles response*/
+    onSearch(searchData: searchParamsType, response: SearchResponsePaginationDataType, cardData: CauseDataType): interface<SearchParamsType> {
+      this.searchData = {
         query: this.searchInput,
         entities: [ {
           entity: "causes",
           perPage:  6,
-          currentPage: 1,
+          currentPage: 1, //this.pagination
         }],
-      };
-      //call Kinder API withawait/async
-
-      //will return?
+      }
+      getOrganizations(this.searchData).then(response => {
+        const cardData = response.causes.data
+        //cardData holds data needed for org cards
+        // return cardData
+      })
     }
+
+    
+      // let pagination += 1;
+      //call Kinder API await/async
 
     onClose(): void {
       console.log("somethings to do...")
@@ -63,7 +81,8 @@
 
   <style>
   .search-container {
-    top: -100px; }
+    top: -100px;
+  }
   .search {
     display: flex;
     flex-direction: row;
@@ -106,4 +125,4 @@
     width: 17px;
     margin-left: 8px;
     margin-right: 3px; }
-</style>
+  </style>

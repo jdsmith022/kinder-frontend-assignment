@@ -114,3 +114,12 @@ export interface CauseCertificateType {
 	website: string
 	source: string
 }
+
+export interface SearchParamsType {
+  query: string,
+  entities: {
+    entity: string,
+    perPage: number,
+    currentPage: number
+  }
+}
