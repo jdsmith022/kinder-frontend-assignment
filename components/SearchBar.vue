@@ -1,31 +1,29 @@
 <template>
   <section class="search-section">
-    <!-- <div class="container"> -->
-      <Header />
-      <div class="container search-container">
-        <div class="search-header">
-          <p class="search-title">
-            Search effective charitable organisations
-          </p>
-          <div class="search">
-            <input v-model="searchInput" class="search-bar" v-on:keyup.enter="onSearch()" placeholder="e.g. Health"/>
-            <b-field>
-            </b-field>
-            <div class="search-bar-icons">
-              <img class="clear-icon" @click="onClear(); openLoading" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
-              <span class="vertical-line"></span>
-              <svg class="search-icon svg-icon search-icon" @click="onSearch()" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">A magnifying glass icon.</desc><g class="search-path" fill="none" stroke="#848F91"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
-            </div>
+    <Header />
+    <div class="container search-container">
+      <div class="search-header">
+        <p class="search-title">
+          Search effective charitable organisations
+        </p>
+        <div class="search">
+          <input v-model="searchInput" class="search-bar" v-on:keyup.enter="onSearch()" placeholder="e.g. Health"/>
+          <b-field>
+          </b-field>
+          <div class="search-bar-icons">
+            <img class="clear-icon" @click="onClear(); openLoading" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
+            <span class="vertical-line"></span>
+            <svg class="search-icon svg-icon search-icon" @click="onSearch()" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">A magnifying glass icon.</desc><g class="search-path" fill="none" stroke="#848F91"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
           </div>
         </div>
-        <div class="search-results">
-          <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
-        </div>
-        <div v-if="searchResults.totalFound > 0" class="load-button">
-          <b-button type="is-light" @click="loadMoreResults()">Load 6 more of {{ searchResults.totalFound }}</b-button>
-        </div>
       </div>
-    <!-- </div> -->
+      <div class="search-results">
+        <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
+      </div>
+      <div v-if="searchResults.totalFound > 0 && remaningResults > 0" class="load-button">
+        <b-button type="is-light" @click="loadMoreResults()">Load {{ remaningResults }} more of {{ searchResults.totalFound }}</b-button>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -55,12 +53,15 @@
         pagination: 1 as number,
         searchInput: '' as string,
         totalFound: 0 as number,
-        totalPages: 0 as number
+        totalPages: 0 as number,
+        holdSearch: '' as string,
+        remaningResults: 6 as number
       };
     }
 
     /** Queries Kinder API and handles response*/
-    onSearch(searchData: ApiDataType, response: SearchResponsePaginationDataType, cardData: CauseDataType, sortedData: ArrangedDataType): void {
+    onSearch(): void {
+      this.checkForNewSearch();
       this.searchData = {
         query: this.searchInput,
         entities: [ {
@@ -71,17 +72,27 @@
       };
       getOrganizations(this.searchData).then(response => {
         this.cardData = response.causes.data;
-        this.totalPages = response.causes.meta.pagination.totalPages;
+        this.totalPages = response.causes.meta.pagination.totalPages,
         this.searchResults = {
           totalFound: response.causes.meta.pagination.total,
           searchParam: this.searchInput
         };
         let index:number = this.arrangeCardData(this.cardData, this.sortedData);
-        this.sortDataOrder(index, this.sortedData);
+        this.sortDataOrder(index, this.sortedData, this.remaningResults);
+        this.holdSearch = this.searchInput;
       })
     }
 
-    loadMoreResults(response: SearchResponsePaginationDataType, cardData: CauseDataType, sortedData: ArrangedDataType) : void {
+    checkForNewSearch(searchInput: string, holdSearch: string, cardData: CauseDataType, sortedData: ArrangedDataType, searchResults: SearchDataType) : void {
+      if (this.searchInput != this.holdSearch && this.holdSearch != '') {
+        this.holdSearch = this.searchInput;
+        this.cardData = {};
+        this.sortedData = {};
+        this.searchResults = {};
+      }
+    }
+
+    loadMoreResults(sortedData: ArrangedDataType) : void {
       if (this.pagination + 1 <= this.totalPages) {
         this.pagination += 1;
         this.searchData = {
@@ -99,8 +110,7 @@
             this.cardData.push(response.causes.data[index]);
           }
           let index:number = this.arrangeCardData(this.cardData, this.sortedData);
-          this.sortDataOrder(index, this.sortedData);
-          console.log("sorted data ", this.sortedData);
+          this.sortDataOrder(index, this.sortedData, this.remaningResults);
           sortedData = this.sortedData;
         })
       }
@@ -133,7 +143,6 @@
         }
         index++;
       }
-      console.log('index ', index - 1);
       return index - 1;
 
     }
@@ -147,6 +156,12 @@
       if (this.pagination > 1) {
         limit = 6 * (this.pagination / 2);
         index = 6 * (this.pagination / 2);
+      }
+      console.log("length, ", length)
+      if (length > this.searchResults.totalFound - 6 && length < this.searchResults.totalFound) {
+        this.remaningResults = this.searchResults.totalFound  % (length + 1);
+      } else if (length + 1 === this.searchResults.totalFound) {
+        this.remaningResults = 0;
       }
       while (index < length) {
         while (subdex > limit) {
@@ -163,13 +178,11 @@
       return this.sortedData;
     }
 
-    //add button!
     onClear(): void {
       this.searchInput = '';
     }
 
   }
-
   </script>
 
   <style>
@@ -228,5 +241,8 @@
   }
   .button {
     border-radius: 0px;
+    font-weight: bold;
+    font-size: 14px;
+    color: gray !important;
   }
   </style>

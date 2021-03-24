@@ -1,23 +1,26 @@
 <template>
-  <section class="section" style="padding: 3rem 0rem;">
-    <div v-if="sortedData">
-      <h3 class="search-organizations-header">
-        Organizations matching '{{ searchResults.searchParam }}'
-        <p class="total-search-result">
-          ( {{ searchResults.totalFound }} )
-        </p>
-      </h3>
-        <div class="columns is-multiline is-mobile">
+  <section style="padding: 3rem 0rem;">
+    <div class="container">
+      <div v-if="searchResults.totalFound > 0">
+        <h3 class="search-organizations-header">
+          Organizations matching '{{ searchResults.searchParam }}'
+          <p class="total-search-result">
+            ( {{ searchResults.totalFound }} )
+          </p>
+        </h3>
+        <div class="columns is-multiline is-mobile" ref="element">
           <div v-for="(set, index) in sortedData" :key="index" class="column is-one-third">
+            <b-loading :is-full-page="false" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading>
             <Card :set="set"/>
           </div>
         </div>
       </div>
-    <div v-else>
-      <div v-if="sortedData.length === 0">
-        <h3 class="search-organizations-header">
-          No orgaizations matching {{ searchResults.searchParam }}
-        </h3>
+      <div v-else>
+        <div v-if="sortedData.length === 0">
+          <h3 class="search-organizations-header">
+            No orgaizations matching {{ searchResults.searchParam }}
+          </h3>
+        </div>
       </div>
     </div>
   </section>
@@ -42,10 +45,30 @@ export default class Results extends Vue {
 
   data() {
     return {
-      // isLoading: false as boolean,
-      // arrangedData: {} as ArrangedDataType,
+      isLoading: false as boolean,
     };
   }
+
+  open() {
+    console.log("loadding bitchesss")
+    const loadingComponent = this.$buefy.loading.open({
+      container: this.isFullPage ? null : this.$refs.element
+    })
+    setTimeout(() => loadingComponent.close(), 1 * 1000)
+  }
+
+  created() {
+    console.log("total ", this.searchResults);
+      if (this.searchResults.totalFound > 0) {
+        this.open()
+      }
+    }
+  // openLoading() {
+  //   this.isLoading = true
+  //   setTimeout(() => {
+  //       this.isLoading = false
+  //   }, 2000)
+  // }
 }
 </script>
 
@@ -59,12 +82,6 @@ export default class Results extends Vue {
     font-weight: normal;
     color: gray;
     opacity: 0.5; }
-  .limit-flex {
-  display: flex !important;
-  flex-wrap: wrap;
-  margin: auto;
-  padding-bottom: 150px;
-  justify-content: center; }
   .columns {
     margin: auto;
   }

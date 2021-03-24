@@ -1,7 +1,7 @@
 <template>
-  <!-- <section> -->
+  <section>
     <SearchBar />
-  <!-- </section> -->
+  </section>
 </template>
 
 <script lang="ts">
