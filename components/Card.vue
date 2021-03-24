@@ -1,45 +1,44 @@
 <template>
   <section>
-    <div class="container"></div>
-  <b-loading :is-full-page="isFullPage" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading>
-  <div class="column" style="position: relative">
-    <div class="card organization-card">
-      <div class="card-content">
-        <div class="card-org-content">
-          <!-- {{ set.shareImage }} -->
-          <!-- {{ set.website }} -->
-
-          <div v-if="set.images.data" class="org-image">
-            <img :src="set.images.data.files.data.url" :href="set.website" target="blank">
-          </div>
-          <div class="sub-header">
-            <p>
-              Organization
-            </p>
-          </div>
-          <div v-if="set.officialName" class="org-name">
-            <p>
-              {{ set.officialName }}
-            </p>
-          </div>
-          <div v-if="set.tagline" class="org-tagline">
-            {{ set.tagline }}
-          </div>
-          <div class="org-categories">
-            <div v-if="set.categories.data" v-for="(category, index) in set.categories.data" :key="index">
-              <div v-if="index > 0">
-                •
-              </div>
-              <p class="category-name">
-                {{ category.name }}
+    <b-loading :is-full-page="isFullPage" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading>
+    <div class="is-multiline">
+      <div class="card organization-card">
+        <div class="card-content">
+          <div class="card-org-content">
+            <div v-if="set.images" class="org-image">
+              <img :src="set.images.data.files.data.url" :href="set.website" target="blank">
+            </div>
+            <div class="sub-header">
+              <p>
+                Organization
               </p>
+            </div>
+            <div v-if="set.officialName" class="org-name">
+              <p>
+                {{ set.officialName }}
+              </p>
+            </div>
+            <div v-if="set.tagline" class="org-tagline">
+              {{ set.tagline }}
+            </div>
+            <div v-if="set.category" class="org-categories">
+              <!-- <div class="categories" : -->
+              <div v-for="(cat, index) in set.category.data" :key="index">
+                <div v-if="index > 0">
+                  •
+                </div>
+                <p class="category-name">
+                  {{ cat.name }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <div class="progress-bar">
+          <b-progress type="is-danger" :value="getProgressBarValue(set.stage)"></b-progress>
+      </div>
     </div>
-  </div>
-</div>
   </section>
 </template>
 
@@ -55,20 +54,34 @@
 
     data() {
       return {
-        // orderedData: {} as CauseDataType,
         isLoading: false as boolean,
-        isFullPage: false as boolean
+        isFullPage: false as boolean,
+        progress: '' as number
       }
     }
 
     @Prop({default: ' '}) set: CauseDataType
-  
 
     openLoading() {
       this.isLoading = true
       setTimeout(() => {
           this.isLoading = false
       }, 2000)
+    }
+
+    /** sets value of progress bar based on stage value
+     *
+     * Stage value is based on requirements set out by Kinder in the assignment
+    */
+    getProgressBarValue(status:number) {
+      if (status === 1) {
+        this.progress = 100;
+      } else if (status === 0) {
+        this.progress - 66;
+      } else if (status === -1) {
+        this.progress = 33;
+      }
+      return this.progress
     }
 
     beforeMount(){
@@ -80,9 +93,9 @@
 
 <style>
   .card {
-    min-height: 345px;
-    min-width: 285px;
-    max-width: 285px;
+    min-height: 370px;
+    /* min-width: 285px;
+    max-width: 285px; */
     border-radius: 0rem;
   }
   .organization-card {
@@ -108,5 +121,9 @@
     display: flex;
     flex-direction: row;
     padding-right: 4px;
+  }
+  .progress {
+    border-radius: 0px !important;
+    height: 3px !important;
   }
 </style>

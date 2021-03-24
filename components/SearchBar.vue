@@ -19,7 +19,6 @@
       </div>
       <div class="search-results">
         <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
-        <!-- <b-loading :is-full-page="isFullPage" v-model="isLoading" :can-cancel="true"></b-loading> -->
       </div>
     </div>
   </section>
@@ -54,16 +53,8 @@
       };
     }
 
-    // openLoading() {
-    //     this.isLoading = true
-    //     setTimeout(() => {
-    //         this.isLoading = false
-    //     }, 2000)
-    //   }
-
     /** Queries Kinder API and handles response*/
     onSearch(searchData: ApiDataType, response: SearchResponsePaginationDataType, cardData: CauseDataType, sortedData: ArrangedDataType): void {
-      // this.openLoading()
       this.searchData = {
         query: this.searchInput,
         entities: [ {
@@ -71,64 +62,66 @@
           perPage:  6,
           currentPage: this.pagination
         }],
-      }
+      };
       getOrganizations(this.searchData).then(response => {
-        this.cardData = response.causes.data
+        this.cardData = response.causes.data;
         this.searchResults = {
           totalFound: response.causes.meta.pagination.total,
           searchParam: this.searchInput
-        }
-        this.pagination = this.pagination + 1
-        let index:number = this.arrangeCardData(this.cardData, this.sortedData)
-        this.sortedDataOrder(index - 1, this.sortedData)
+        };
+        this.pagination = this.pagination + 1;
+        let index:number = this.arrangeCardData(this.cardData, this.sortedData);
+        this.sortDataOrder(index - 1, this.sortedData);
+        console.log("sorted data ", this.sortedData);
       })
-      console.log("arrange", this.sortedData)
     }
 
     arrangeCardData(cardData: CauseDataType, sortedData: ArrangedDataType): number {
-      let stage:Array<number> = []
-      let index:number = 0
+      let stage:Array<number> = [];
+      let index:number = 0;
 
       while (index < 6 && this.cardData[index]) {
-        let basicPass:boolean = this.cardData[index].hasPassedPreliminary
-        let published:string = this.cardData[index].publishedAt
+        let basicPass:boolean = this.cardData[index].hasPassedPreliminary;
+        let published:string = this.cardData[index].publishedAt;
         this.sortedData[index] = {
           officialName: this.cardData[index].officialName,
           tagline: this.cardData[index].tagline,
           category: this.cardData[index].categories,
-          stage: -1,
+          stage: '',
           images: this.cardData[index].images,
           logo: this.cardData[index].logo,
           website: this.cardData[index].website
-        }
+        };
         if (basicPass === true && published != false) {
-          this.sortedData[index].stage = 1
+          this.sortedData[index].stage = 1;
         } else if (basicPass === true && published === false) {
-          this.sortedData[index].stage = 0
+          this.sortedData[index].stage = 0;
         } else if (basicPass === false) {
           this.sortedData[index].stage = -1;
         }
         index++;
       }
-      // this.putDataInNewOrder(this.arrangedData, index - 1)
       return index - 1;
     }
 
-    sortedDataOrder(subdex:number, sortedData: ArrangedDataType ): void {
-      let temp:ArrangedDataType = {}
-      let index:number = 0
-      let length:number = subdex
+    sortDataOrder(subdex:number, sortedData: ArrangedDataType ): void {
+      let temp:ArrangedDataType = {};
+      let index:number = 0;
+      let length:number = subdex;
 
       while (index < length) {
-        while (subdex > 0 && this.sortedData[subdex].stage < this.sortedData[subdex - 1].stage) {
-          temp = this.sortedData[subdex]
-          this.sortedData[subdex] = this.sortedData[subdex - 1]
-          this.sortedData[subdex - 1] = temp
-          subdex--
+        subdex = length;
+        while (subdex > 0) {
+          if (this.sortedData[subdex].stage > this.sortedData[subdex - 1].stage) {
+            temp = this.sortedData[subdex];
+            this.sortedData[subdex] = this.sortedData[subdex - 1];
+            this.sortedData[subdex - 1] = temp;
+          }
+          subdex--;
         }
-        index++
+        index++;
       }
-      return (this.sortedData)
+      return (this.sortedData);
     }
 
     //add button!
