@@ -6,7 +6,7 @@
         <div class="card-content">
           <div class="card-org-content">
             <div v-if="set.images" class="org-image">
-              <img :src="set.images.data.files.data.url" :href="set.website" target="blank">
+              <img :src="set.images" :href="set.website" target="blank">
             </div>
             <div class="sub-header">
               <p>
@@ -17,7 +17,7 @@
               <p>
                 {{ set.officialName }}
               </p>
-            </div>
+            </div>  
             <div v-if="set.tagline" class="org-tagline">
               {{ set.tagline }}
             </div>
@@ -56,7 +56,7 @@
       return {
         isLoading: false as boolean,
         isFullPage: false as boolean,
-        progress: '' as number
+        progress: 0 as number
       }
     }
 

@@ -1,26 +1,31 @@
 <template>
-  <section>
-    <Header />
-    <div class="container search-container">
-      <div class="search-header">
-        <p class="search-title">
-          Search effective charitable organisations
-        </p>
-        <div class="search">
-          <input v-model="searchInput" class="search-bar" v-on:keyup.enter="onSearch()" placeholder="e.g. Health"/>
-          <b-field>
-          </b-field>
-          <div class="search-bar-icons">
-            <img class="clear-icon" @click="onClear(); openLoading" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
-            <span class="vertical-line"></span>
-            <svg class="search-icon svg-icon search-icon" @click="onSearch()" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">A magnifying glass icon.</desc><g class="search-path" fill="none" stroke="#848F91"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+  <section class="search-section">
+    <!-- <div class="container"> -->
+      <Header />
+      <div class="container search-container">
+        <div class="search-header">
+          <p class="search-title">
+            Search effective charitable organisations
+          </p>
+          <div class="search">
+            <input v-model="searchInput" class="search-bar" v-on:keyup.enter="onSearch()" placeholder="e.g. Health"/>
+            <b-field>
+            </b-field>
+            <div class="search-bar-icons">
+              <img class="clear-icon" @click="onClear(); openLoading" src="https://img.icons8.com/ios/50/000000/delete-sign--v1.png"/>
+              <span class="vertical-line"></span>
+              <svg class="search-icon svg-icon search-icon" @click="onSearch()" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">A magnifying glass icon.</desc><g class="search-path" fill="none" stroke="#848F91"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+            </div>
           </div>
         </div>
+        <div class="search-results">
+          <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
+        </div>
+        <div v-if="searchResults.totalFound > 0" class="load-button">
+          <b-button type="is-light" @click="loadMoreResults()">Load 6 more of {{ searchResults.totalFound }}</b-button>
+        </div>
       </div>
-      <div class="search-results">
-        <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
-      </div>
-    </div>
+    <!-- </div> -->
   </section>
 </template>
 
@@ -47,9 +52,10 @@
         searchResults: {} as SearchDataType,
         cardData: {} as CauseDataType,
         sortedData: {} as ArrangedDataType,
-        pagination: '1' as string,
+        pagination: 1 as number,
         searchInput: '' as string,
-        totalFound: '' as number,
+        totalFound: 0 as number,
+        totalPages: 0 as number
       };
     }
 
@@ -60,27 +66,53 @@
         entities: [ {
           entity: "causes",
           perPage:  6,
-          currentPage: this.pagination
+          currentPage: 1
         }],
       };
       getOrganizations(this.searchData).then(response => {
         this.cardData = response.causes.data;
+        this.totalPages = response.causes.meta.pagination.totalPages;
         this.searchResults = {
           totalFound: response.causes.meta.pagination.total,
           searchParam: this.searchInput
         };
-        this.pagination = this.pagination + 1;
         let index:number = this.arrangeCardData(this.cardData, this.sortedData);
-        this.sortDataOrder(index - 1, this.sortedData);
-        console.log("sorted data ", this.sortedData);
+        this.sortDataOrder(index, this.sortedData);
       })
     }
 
+    loadMoreResults(response: SearchResponsePaginationDataType, cardData: CauseDataType, sortedData: ArrangedDataType) : void {
+      if (this.pagination + 1 <= this.totalPages) {
+        this.pagination += 1;
+        this.searchData = {
+          query: this.searchInput,
+          entities: [ {
+            entity: "causes",
+            perPage:  6,
+            currentPage: this.pagination
+          }],
+        };
+        getOrganizations(this.searchData).then(response => {
+          //add new results to cardData and reorganizes based on stage
+          this.sortedData = {};
+          for(index = 0; index < 6; index++) {
+            this.cardData.push(response.causes.data[index]);
+          }
+          let index:number = this.arrangeCardData(this.cardData, this.sortedData);
+          this.sortDataOrder(index, this.sortedData);
+          console.log("sorted data ", this.sortedData);
+          sortedData = this.sortedData;
+        })
+      }
+    }
+
     arrangeCardData(cardData: CauseDataType, sortedData: ArrangedDataType): number {
+
       let stage:Array<number> = [];
       let index:number = 0;
+      let limit:number = 6 * this.pagination
 
-      while (index < 6 && this.cardData[index]) {
+      while (index < limit && this.cardData[index]) {
         let basicPass:boolean = this.cardData[index].hasPassedPreliminary;
         let published:string = this.cardData[index].publishedAt;
         this.sortedData[index] = {
@@ -101,17 +133,23 @@
         }
         index++;
       }
+      console.log('index ', index - 1);
       return index - 1;
+
     }
 
     sortDataOrder(subdex:number, sortedData: ArrangedDataType ): void {
       let temp:ArrangedDataType = {};
       let index:number = 0;
       let length:number = subdex;
+      let limit:number = 0;
 
+      if (this.pagination > 1) {
+        limit = 6 * (this.pagination / 2);
+        index = 6 * (this.pagination / 2);
+      }
       while (index < length) {
-        subdex = length;
-        while (subdex > 0) {
+        while (subdex > limit) {
           if (this.sortedData[subdex].stage > this.sortedData[subdex - 1].stage) {
             temp = this.sortedData[subdex];
             this.sortedData[subdex] = this.sortedData[subdex - 1];
@@ -119,9 +157,10 @@
           }
           subdex--;
         }
+        subdex = length;
         index++;
       }
-      return (this.sortedData);
+      return this.sortedData;
     }
 
     //add button!
@@ -136,6 +175,10 @@
   <style>
   .search-container {
     top: -115px;
+  }
+  .search-section {
+    background-color: #F8F8F8;
+    height: 150px;
   }
   .search {
     display: flex;
@@ -180,4 +223,10 @@
     width: 17px;
     margin-left: 8px;
     margin-right: 3px; }
+  .load-button {
+    text-align: center;
+  }
+  .button {
+    border-radius: 0px;
+  }
   </style>
