@@ -1,8 +1,6 @@
 <template>
   <section>
-    <!-- <b-loading :is-full-page="false" v-model="isLoading" :can-cancel="true"></b-loading> -->
     <div class="container">
-      <!-- <b-loading :is-full-page="false" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading> -->
       <div class="is-multiline">
         <div class="card organization-card">
           <div class="card-content">
@@ -19,20 +17,22 @@
                 <p>
                   {{ set.officialName }}
                 </p>
-              </div>  
+              </div>
               <div v-if="set.tagline" class="org-tagline">
                 {{ set.tagline }}
               </div>
               <div v-if="set.category" class="org-categories">
-                <!-- <div class="categories" : -->
-                  <div v-for="(cat, index) in set.category.data" :key="index">
-                    <div v-if="index > 0">
-                      •
-                    </div>
-                    <p class="category-name">
-                      {{ cat.name }}
-                    </p>
-                  </div>
+                {{ set.category.data.name }}
+                </div>
+              </div>
+              <div class="membership-box" v-if="set.stage === 0 || set.stage === -1">
+                <div class="gray-box">
+                  <p class="membership-title">
+                    Membership pending
+                  </p>
+                   <p class="membership-paragraph">
+                    This organisation has no published profile
+                   </p>
                 </div>
               </div>
             </div>
@@ -57,8 +57,8 @@
 
     data() {
       return {
-        isLoading: false as boolean,
-        progress: 0 as number
+        progress: 0 as number,
+        categoryString: '' as string
       }
     }
 
@@ -79,15 +79,11 @@
       if (status === 1) {
         this.progress = 100;
       } else if (status === 0) {
-        this.progress - 66;
+        this.progress = 66;
       } else if (status === -1) {
         this.progress = 33;
       }
       return this.progress
-    }
-
-    beforeMount(){
-      this.openLoading()
     }
 
   }
@@ -95,10 +91,14 @@
 
 <style>
   .card {
-    min-height: 370px;
+    min-height: 290px;
     /* min-width: 285px;
     max-width: 285px; */
     border-radius: 0rem;
+  }
+  .card-content {
+    position: relative;
+    min-height: 290px;
   }
   .organization-card {
     box-shadow: gray;
@@ -127,5 +127,28 @@
   .progress {
     border-radius: 0px !important;
     height: 3px !important;
+  }
+  .membership-box {
+    bottom: 24px;
+    right: 24px;
+    position: absolute;
+    left: 24px;
+  }
+  .gray-box {
+    background-color: #f7f7f7;
+    border: 1px solid #e8e5e5;
+    margin: auto;
+    margin-top: 24px;
+  }
+  .membership-title {
+    padding: 16px 16px 0px 16px;
+    font-size: 13px;
+    font-weight: 550;
+    color: #868282;
+  }
+  .membership-paragraph {
+    font-size: 12px;
+    padding: 8px 16px 16px;
+    color: gray;
   }
 </style>

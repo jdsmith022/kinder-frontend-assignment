@@ -21,6 +21,7 @@
         <Results :searchResults="searchResults" :sortedData="sortedData"></Results>
       </div>
       <div v-if="searchResults.totalFound > 0 && remaningResults > 0" class="load-button">
+        <b-loading :is-full-page="false" v-model="isLoading"></b-loading>
         <b-button type="is-light" @click="loadMoreResults()">Load {{ remaningResults }} more of {{ searchResults.totalFound }}</b-button>
       </div>
     </div>
@@ -55,7 +56,9 @@
         totalFound: 0 as number,
         totalPages: 0 as number,
         holdSearch: '' as string,
-        remaningResults: 6 as number
+        remaningResults: 6 as number,
+        isLoading: false as boolean,
+        index: 0 as number,
       };
     }
 
@@ -79,6 +82,7 @@
         };
         let index:number = this.arrangeCardData(this.cardData, this.sortedData);
         this.sortDataOrder(index, this.sortedData, this.remaningResults);
+        this.category(index, this.sortedData);
         this.holdSearch = this.searchInput;
       })
     }
@@ -93,6 +97,7 @@
     }
 
     loadMoreResults(sortedData: ArrangedDataType) : void {
+      // this.openLoading();
       if (this.pagination + 1 <= this.totalPages) {
         this.pagination += 1;
         this.searchData = {
@@ -111,6 +116,7 @@
           }
           let index:number = this.arrangeCardData(this.cardData, this.sortedData);
           this.sortDataOrder(index, this.sortedData, this.remaningResults);
+          this.category(index, this.sortedData);
           sortedData = this.sortedData;
         })
       }
@@ -157,7 +163,6 @@
         limit = 6 * (this.pagination / 2);
         index = 6 * (this.pagination / 2);
       }
-      console.log("length, ", length)
       if (length > this.searchResults.totalFound - 6 && length < this.searchResults.totalFound) {
         this.remaningResults = this.searchResults.totalFound  % (length + 1);
       } else if (length + 1 === this.searchResults.totalFound) {
@@ -180,6 +185,28 @@
 
     onClear(): void {
       this.searchInput = '';
+    }
+
+    category(setLength:number, sortedData: ArrangedDataType ) : void {
+      let categoryString:string = '';
+
+      for(let trudex:number = 0; trudex < setLength; trudex++) {
+        categoryString = '';
+        let length:number = this.sortedData[trudex].category.data.length;
+        if (setLength === 1) {
+          categoryString = this.sortedData[0].category.data[0].name;
+        } else if (length === 1) {
+          categoryString = this.sortedData[trudex].category.data[0].name;
+        } else {
+          for(let index:number = 0; index < length; index++) {
+            categoryString += this.sortedData[trudex].category.data[index].name;
+            if (index + 1 < length) {
+              categoryString += ' • ';
+            }
+          }
+        }
+        this.sortedData[trudex].category.data.name = categoryString;
+      }
     }
 
   }

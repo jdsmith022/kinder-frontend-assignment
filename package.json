@@ -9,6 +9,9 @@
     "generate": "nuxt-ts generate"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/vue-fontawesome": "^3.0.0-3",
     "@nuxt/typescript-runtime": "^2.0.1",
     "core-js": "^3.8.3",
     "cypress": "^6.7.1",

@@ -10,7 +10,6 @@
         </h3>
         <div class="columns is-multiline is-mobile" ref="element">
           <div v-for="(set, index) in sortedData" :key="index" class="column is-one-third">
-            <b-loading :is-full-page="false" v-model="isLoading" :can-cancel="true" style="position: relative"></b-loading>
             <Card :set="set"/>
           </div>
         </div>
@@ -57,12 +56,12 @@ export default class Results extends Vue {
     setTimeout(() => loadingComponent.close(), 1 * 1000)
   }
 
-  created() {
-    console.log("total ", this.searchResults);
-      if (this.searchResults.totalFound > 0) {
-        this.open()
-      }
-    }
+  // created() {
+  //   console.log("total ", this.searchResults);
+  //     if (this.searchResults.totalFound > 0) {
+  //       this.open()
+  //     }
+  //   }
   // openLoading() {
   //   this.isLoading = true
   //   setTimeout(() => {
